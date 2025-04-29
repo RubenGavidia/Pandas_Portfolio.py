@@ -1,5 +1,78 @@
 # Pandas_Portfolio.py
 Last work done with Pandas
+```
+import fitz  # PyMuPDF
+import pandas as pd
+import nltk
+from collections import Counter
+import string
+import matplotlib.pyplot as plt  # Importar matplotlib para graficar
+import numpy as np  # Importar numpy para cálculos
+
+# Asegurarse de tener los recursos necesarios de nltk
+nltk.download('stopwords')
+nltk.download('punkt')
+from nltk.corpus import stopwords
+from nltk.tokenize import word_tokenize
+
+# Cargar stopwords en español
+stop_words = set(stopwords.words('spanish'))
+
+# Función para leer texto desde un PDF
+def leer_pdf(ruta_pdf):
+    doc = fitz.open(ruta_pdf)
+    texto = ""
+    for pagina in doc:
+        texto += pagina.get_text()
+    return texto
+
+# Procesar el texto
+def procesar_texto(texto):
+    texto = texto.lower()
+    texto = texto.translate(str.maketrans('', '', string.punctuation))
+    palabras = word_tokenize(texto, language='spanish')
+    palabras_limpias = [palabra for palabra in palabras if palabra not in stop_words and palabra.isalpha()]
+    return palabras_limpias
+
+# Leer el PDF (reemplaza con la ruta a tu archivo)
+ruta = "Cien años de soledad - Gabriel Garcia Marquez1.pdf"
+texto_pdf = leer_pdf(ruta)
+palabras = procesar_texto(texto_pdf)
+
+# Contar y mostrar las 12 palabras más comunes
+conteo = Counter(palabras)
+top_12 = conteo.most_common(12)
+
+# Convertir a DataFrame y mostrar
+df_top = pd.DataFrame(top_12, columns=["Palabra", "Frecuencia"])
+print(df_top)
+
+# Crear el gráfico de tipo Pie Chart con mejoras visuales
+plt.figure(figsize=(10, 7))
+# Colores personalizados para el pie chart
+colores = plt.cm.Paired(range(len(df_top)))
+
+# Crear el gráfico de pie
+wedges, texts, autotexts = plt.pie(df_top['Frecuencia'], labels=df_top['Palabra'], startangle=90, 
+                                   colors=colores, wedgeprops={'edgecolor': 'black'}, autopct='%1.1f%%')
+
+# Asegurar que el gráfico sea circular
+plt.axis('equal')
+
+# Añadir las frecuencias fuera del gráfico (calculando las posiciones)
+for i, p in enumerate(wedges):
+    angle = (p.theta2 - p.theta1) / 2. + p.theta1
+    x = np.cos(np.radians(angle)) * 1.4  # Ajuste de la distancia de las frecuencias
+    y = np.sin(np.radians(angle)) * 1.4  # Ajuste de la distancia de las frecuencias
+    plt.text(x, y, f'{df_top["Frecuencia"][i]}', ha='center', va='center', fontweight='bold', fontsize=12)
+
+# Título y estilos mejorados
+plt.title('100 years of solitude', fontsize=16, fontweight='bold', color='navy')
+
+# Mostrar el gráfico
+plt.show()
+```
+![2025-04-29 03_56_36-Untitled](https://github.com/user-attachments/assets/fe22b591-196d-448e-b89a-8901bc106ff1)
 
 Before:
 
